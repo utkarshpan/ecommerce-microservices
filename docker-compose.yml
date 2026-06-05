@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: ecommerce-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: indu1989
+      POSTGRES_DB: ecommerce
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ecommerce-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: ecommerce-backend
+    environment:
+      DB_USER: postgres
+      DB_HOST: postgres
+      DB_NAME: ecommerce
+      DB_PASSWORD: indu1989
+      DB_PORT: 5432
+      JWT_SECRET: your_super_secret_key_change_this
+      PORT: 5000
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ecommerce-network
+
+  frontend:
+    build: ./frontend
+    container_name: ecommerce-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - ecommerce-network
+    environment:
+      REACT_APP_API_URL: http://localhost:5000
+
+networks:
+  ecommerce-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
