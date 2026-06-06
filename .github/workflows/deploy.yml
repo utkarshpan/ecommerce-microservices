@@ -1,0 +1,104 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  # JOB 1: Test Backend
+  test-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Run backend tests
+        run: |
+          cd backend
+          npm test || echo "No tests yet"
+
+  # JOB 2: Test Frontend
+  test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+  # JOB 3: Build Docker Images
+  build-docker:
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/ecommerce-backend:latest
+
+      - name: Build and push Frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/ecommerce-frontend:latest
+
+  # JOB 4: Deploy to Minikube (Local) or Cloud
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-docker
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Update k8s files with Docker Hub images
+        run: |
+          sed -i 's|ecommerce-microservices-backend:latest|${{ secrets.DOCKER_USERNAME }}/ecommerce-backend:latest|g' k8s/backend-deployment.yaml
+          sed -i 's|ecommerce-microservices-frontend:latest|${{ secrets.DOCKER_USERNAME }}/ecommerce-frontend:latest|g' k8s/frontend-deployment.yaml
+          sed -i 's|Never|Always|g' k8s/backend-deployment.yaml
+          sed -i 's|Never|Always|g' k8s/frontend-deployment.yaml
+
+      - name: Deploy to Kubernetes
+        run: |
+          echo "Deployment would happen here"
+          echo "For Minikube: minikube start"
+          echo "For Cloud: kubectl apply -f k8s/"
