@@ -56,35 +56,34 @@ This is a **production-ready, cloud-native e-commerce platform** built with micr
 ## 🏗️ Architecture
 
 ### System Architecture Diagram
-─────────────────────────────────────┐
-│ Client Browser │
-│ (React Application) │
-│ Port: 3000 │
-└─────────────────┬───────────────────┘
-│
-▼
-┌─────────────────────────────────────┐
-│ API Gateway │
-│ (Express Proxy) │
-│ Port: 8000 │
-└─────────────────┬───────────────────┘
-│
-┌───────────────────────────┼───────────────────────────┐
-│ │ │
-▼ ▼ ▼
-┌─────────────────────────┐ ┌─────────────────────────┐ ┌─────────────────────────┐
-│ Product Service │ │ Order Service │ │ User Service │
-│ (Port: 8081) │ │ (Port: 8082) │ │ (Port: 8083) │
-│ REST API │ │ REST API │ │ REST API │
-└───────────┬─────────────┘ └───────────┬─────────────┘ └───────────┬─────────────┘
-│ │ │
-▼ ▼ ▼
-┌─────────────────────────┐ ┌─────────────────────────┐ ┌─────────────────────────┐
-│ Product Database │ │ Order Database │ │ User Database │
-│ PostgreSQL │ │ PostgreSQL │ │ PostgreSQL │
-│ Port: 5433 │ │ Port: 5434 │ │ Port: 5435 │
-└─────────────────────────┘ └─────────────────────────┘ └─────────────────────────┘
-
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              Client Browser                                 │
+│                           (React + Material UI)                             │
+│                                Port: 3000                                   │
+└─────────────────────────────────┬───────────────────────────────────────────┘
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              API Gateway                                    │
+│                            (Express Proxy)                                  │
+│                                Port: 8000                                   │
+└─────────────────────────────────┬───────────────────────────────────────────┘
+                                  │
+        ┌─────────────────────────┼─────────────────────────┐
+        │                         │                         │
+        ▼                         ▼                         ▼
+┌───────────────┐         ┌───────────────┐         ┌───────────────┐
+│   Product     │         │    Order      │         │    User       │
+│   Service     │         │   Service     │         │   Service     │
+│   Port: 8081  │         │   Port: 8082  │         │   Port: 8083  │
+└───────┬───────┘         └───────┬───────┘         └───────┬───────┘
+        │                         │                         │
+        ▼                         ▼                         ▼
+┌───────────────┐         ┌───────────────┐         ┌───────────────┐
+│  Product DB   │         │   Order DB    │         │   User DB     │
+│  PostgreSQL   │         │  PostgreSQL   │         │  PostgreSQL   │
+│   Port: 5433  │         │   Port: 5434  │         │   Port: 5435  │
+└───────────────┘         └───────────────┘         └───────────────┘
 
 ### Request Flow
 User Request → API Gateway → Service Discovery → Microservice → Database → Response
@@ -155,50 +154,41 @@ User Request → API Gateway → Service Discovery → Microservice → Database
 ## 📁 Project Structure
 ecommerce-microservices/
 │
-├── frontend/ # React Frontend Application
-│ ├── src/
-│ │ ├── components/ # Reusable UI Components
-│ │ ├── pages/ # Page Components
-│ │ │ ├── Home.js
-│ │ │ ├── Cart.js
-│ │ │ ├── Checkout.js
-│ │ │ ├── Orders.js
-│ │ │ └── Profile.js
-│ │ ├── services/ # API Services
-│ │ │ └── api.js
-│ │ ├── App.js # Main App Component
-│ │ └── index.js # Entry Point
-│ ├── public/ # Static Files
-│ ├── Dockerfile # Frontend Container
-│ └── package.json # Dependencies
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── App.js
+│   │   └── index.js
+│   ├── public/
+│   ├── Dockerfile
+│   └── package.json
 │
-├── product-service/ # Product Microservice
-│ ├── index.js # Service Code
-│ ├── Dockerfile # Container Config
-│ └── package.json # Dependencies
+├── product-service/
+│   ├── index.js
+│   ├── Dockerfile
+│   └── package.json
 │
-├── order-service/ # Order Microservice
-│ ├── index.js # Service Code
-│ ├── Dockerfile # Container Config
-│ └── package.json # Dependencies
+├── order-service/
+│   ├── index.js
+│   ├── Dockerfile
+│   └── package.json
 │
-├── api-gateway/ # API Gateway
-│ ├── index.js # Gateway Code
-│ ├── Dockerfile # Container Config
-│ └── package.json # Dependencies
+├── api-gateway/
+│   ├── index.js
+│   ├── Dockerfile
+│   └── package.json
 │
-├── k8s/ # Kubernetes Manifests
-│ ├── postgres-deployment.yaml # Database Deployment
-│ ├── backend-deployment.yaml # Backend Deployment
-│ └── frontend-deployment.yaml # Frontend Deployment
+├── k8s/
+│   ├── postgres-deployment.yaml
+│   ├── backend-deployment.yaml
+│   └── frontend-deployment.yaml
 │
-├── .github/
-│ └── workflows/ # CI/CD Pipeline
-│ └── ci-cd.yml # GitHub Actions Workflow
+├── .github/workflows/
+│   └── ci-cd.yml
 │
-├── docker-compose.yml # Docker Compose Configuration
-└── README.md # Documentation
-
+├── docker-compose.yml
+└── README.md
 ---
 
 ## 🚀 Getting Started
